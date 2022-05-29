@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections;
 using Excel = Microsoft.Office.Interop.Excel;
-
-
-
-
+using System.Runtime.InteropServices;
 
 namespace Test
 {
@@ -19,9 +16,10 @@ namespace Test
         {
             
             
+            string adress = $"{Environment.CurrentDirectory}\\Questions\\Questions.xlsx";
 
-            Excel.Application xlApp = new Excel.Application();
-            Excel.Workbook xlWorkbook = xlApp.Workbooks.Open("D:\\Questions.xlsx");
+            Excel.Application xlApp = new();
+            Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(adress);
 
             //int colCount = xlRange.Columns.Count; //Колонки
             int count = 0;
@@ -102,16 +100,22 @@ namespace Test
                     Console.Clear();
                 }
             }
-            //Report(userName, level, report, questionsQuontyty);
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            //Marshal.ReleaseComObject(xlRange);
-            //Marshal.ReleaseComObject(xlWorksheet);
-            xlWorkbook.Close();
-            // Marshal.ReleaseComObject(xlWorkbook);
-            xlApp.Quit();
 
-            //Marshal.ReleaseComObject(xlApp);
+            Marshal.ReleaseComObject(xlRange);
+            Marshal.ReleaseComObject(xlWorksheet);  
+            xlWorkbook.Close();
+            Marshal.ReleaseComObject(xlWorkbook);
+            xlApp.Quit();
+            Marshal.ReleaseComObject(xlApp);             
+            Marshal.ReleaseComObject(xlRange);
+            
+            
+
+            
+
+
             ReportToExcel(userName, level, report, questionsQuontyty);
             Console.CursorVisible = false;
             Console.WriteLine("Данные сохранены.\nНажмите <Enter> для завершения программы");
@@ -126,68 +130,74 @@ namespace Test
         {
             int score = 0;
             Excel.Application excel;
-            Excel.Workbook worKbooK;
-            Excel.Worksheet worKsheeT;
-            //Excel.Range celLrangE;
+            Excel.Workbook workBook;
+            Excel.Worksheet workSheet;
+            
 
 
             excel = new Excel.Application();
             excel.Visible = false;
             excel.DisplayAlerts = false;
-            worKbooK = excel.Workbooks.Add(Type.Missing);
+            workBook = excel.Workbooks.Add(Type.Missing);
 
 
-            worKsheeT = (Excel.Worksheet)worKbooK.ActiveSheet;
-            worKsheeT.Name = userName;
+            workSheet = (Excel.Worksheet)workBook.ActiveSheet;
+            workSheet.Name = userName;
 
-            worKsheeT.Range[worKsheeT.Cells[1, 1], worKsheeT.Cells[1, 8]].Merge();
-            worKsheeT.Range[worKsheeT.Cells[2, 1], worKsheeT.Cells[2, 8]].Merge();
-            worKsheeT.Range[worKsheeT.Cells[3, 1], worKsheeT.Cells[3, 8]].Merge();
-            worKsheeT.Cells[1, 1] = $"Результаты тестирования пользователя {userName}";
-            worKsheeT.Cells[2, 1] = $"Время тестирования: {DateTime.Now.ToString()}";
-            worKsheeT.Cells[3, 1] = $"Уровень сложности: {level}";
-            worKsheeT.Cells[5, 1] = "№";
-            worKsheeT.Cells[5, 2] = "Вопрос";
-            worKsheeT.Cells[5, 3] = "Верный ответ";
-            worKsheeT.Cells[5, 4] = "Ответ Пользователя";
-            worKsheeT.Cells[5, 5] = "Балл";
-            worKsheeT.Cells[5, 6] = "Длительность ответа";
+            workSheet.Range[workSheet.Cells[1, 1], workSheet.Cells[1, 8]].Merge();
+            workSheet.Range[workSheet.Cells[2, 1], workSheet.Cells[2, 8]].Merge();
+            workSheet.Range[workSheet.Cells[3, 1], workSheet.Cells[3, 8]].Merge();
+            workSheet.Cells[1, 1] = $"Результаты тестирования пользователя {userName}";
+            workSheet.Cells[2, 1] = $"Время тестирования: {DateTime.Now.ToString()}";
+            workSheet.Cells[3, 1] = $"Уровень сложности: {level}";
+            workSheet.Cells[5, 1] = "№";
+            workSheet.Cells[5, 2] = "Вопрос";
+            workSheet.Cells[5, 3] = "Верный ответ";
+            workSheet.Cells[5, 4] = "Ответ Пользователя";
+            workSheet.Cells[5, 5] = "Балл";
+            workSheet.Cells[5, 6] = "Длительность ответа";
 
 
 
             for (int i = 1; i <= qq; i++)
             {
-                worKsheeT.Cells[5 + i, 1] = i;
-                worKsheeT.Cells[5 + i, 2] = report[i-1, 0];
-                worKsheeT.Cells[5 + i, 3] = report[i-1, 1];
-                worKsheeT.Cells[5 + i, 4] = report[i-1, 2];
-                worKsheeT.Cells[5 + i, 5] = report[i-1, 3];
-                worKsheeT.Cells[5 + i, 6] = report[i-1, 4];
+                workSheet.Cells[5 + i, 1] = i;
+                workSheet.Cells[5 + i, 2] = report[i-1, 0];
+                workSheet.Cells[5 + i, 3] = report[i-1, 1];
+                workSheet.Cells[5 + i, 4] = report[i-1, 2];
+                workSheet.Cells[5 + i, 5] = report[i-1, 3];
+                workSheet.Cells[5 + i, 6] = report[i-1, 4];
                 score += Convert.ToInt32(report[i-1, 3]);
             }
 
-            worKsheeT.Cells[qq + 7, 1] = $"Пользователь набрал {score} из {qq} баллов";
-            worKsheeT.Range[worKsheeT.Cells[qq + 7, 1], worKsheeT.Cells[qq + 7, 8]].Merge();
+            workSheet.Cells[qq + 7, 1] = $"Пользователь набрал {score} из {qq} баллов";
+            workSheet.Range[workSheet.Cells[qq + 7, 1], workSheet.Cells[qq + 7, 8]].Merge();
 
-            worKsheeT.Cells.Font.Size = 10;
-            worKsheeT.Columns[1].AutoFit();
-            worKsheeT.Columns[2].AutoFit();
-            worKsheeT.Columns[3].AutoFit();
-            worKsheeT.Columns[4].AutoFit();
-            worKsheeT.Columns[5].AutoFit();
-            worKsheeT.Columns[6].AutoFit();
+            workSheet.Cells.Font.Size = 10;
+            workSheet.Columns[1].AutoFit();
+            workSheet.Columns[2].AutoFit();
+            workSheet.Columns[3].AutoFit();
+            workSheet.Columns[4].AutoFit();
+            workSheet.Columns[5].AutoFit();
+            workSheet.Columns[6].AutoFit();
 
-            string fileName = ($"\\Report\\{userName}-{DateTime.Now.ToString()}.xlsx");
-            string fileName2 = "D:" + fileName.Replace(':', '_');
-            //Console.WriteLine(fileName2);
+            string currentTime = DateTime.Now.ToString().Replace(':', '_');
 
 
-            worKbooK.SaveAs(fileName2);
-            
-            worKbooK.Close();
+
+            string fileName = ($"{Environment.CurrentDirectory}\\Report\\{userName}-{currentTime}.xlsx");
+
+
+            Console.WriteLine(fileName);
+            workBook.SaveAs(fileName);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            workBook.Close();
+            Marshal.ReleaseComObject(workBook);
             excel.Quit();
-
-
+            Marshal.ReleaseComObject(excel);
         }
 
        
