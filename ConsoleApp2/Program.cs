@@ -260,7 +260,7 @@ namespace Test
             //Console.WriteLine();
             //Console.WriteLine("Нажмите <Enter> клавишу для перехода к следующему вопросу");
             //Console.Read();
-            //return rightAnswer;
+            
         }
         public static void Shuffle(string[] arr, int count)
         {
