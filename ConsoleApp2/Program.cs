@@ -19,11 +19,11 @@ namespace Test
             string adress = $"{Environment.CurrentDirectory}\\Questions\\Questions.xlsx";
 
             Excel.Application xlApp = new();
+
+            xlApp.Visible = false;
+            xlApp.DisplayAlerts = false;
+
             Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(adress);
-
-            
-
-            //int colCount = xlRange.Columns.Count; //Колонки
             int count = 0;
             int countQuestions = 1;
             string temp;
@@ -36,12 +36,8 @@ namespace Test
             levelsQuantity = xlWorkbook.Sheets.Count;
 
             Console.WriteLine("ТЕСТ\n\n");
-
             Console.Write("Введите свои Имя и Фамилию: ");
             userName = Console.ReadLine();
-
-
-
             Console.Write("Введите уровень сложности: ");
             while (true) //Проверка ввода уровня сложности
             {
@@ -103,20 +99,30 @@ namespace Test
                 }
             }
 
-           // Marshal.ReleaseComObject(xlRange);
-         //   Marshal.ReleaseComObject(xlRange);
+            //xlWorkbook.Save();
 
             CloseExcel(xlRange, xlWorkbook, xlWorksheet, xlApp);
 
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            
+
             ReportToExcel(userName, level, report, questionsQuontyty);
+
+            GC.Collect();                           
+            GC.WaitForPendingFinalizers();
+
             Console.CursorVisible = false;
             Console.WriteLine("Данные сохранены.\nНажмите <Enter> для завершения программы");
+            
             Console.Read();
+
+
         }
         static void CloseExcel(Excel.Range xlRange, Excel.Workbook WorkBook, Excel.Worksheet WorkSheet, Excel.Application Excel)
         {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
 
             Marshal.ReleaseComObject(xlRange);
 
@@ -126,32 +132,20 @@ namespace Test
             Excel.Quit();
             Marshal.ReleaseComObject(Excel);
 
-
-
-
-
-
         }
-
-
 
 
         static void ReportToExcel(string userName, int level, string[,] report, int qq)
         {
             int score = 0;
-            Excel.Application excel;
-            Excel.Workbook workBook;
-            Excel.Worksheet workSheet;
-            
+            Excel.Application excel = new ();
 
-
-            excel = new Excel.Application();
             excel.Visible = false;
             excel.DisplayAlerts = false;
-            workBook = excel.Workbooks.Add(Type.Missing);
 
+            Excel.Workbook workBook = excel.Workbooks.Add(Type.Missing);
+            Excel.Worksheet workSheet = (Excel.Worksheet)workBook.ActiveSheet;
 
-            workSheet = (Excel.Worksheet)workBook.ActiveSheet;
             workSheet.Name = userName;
 
             Excel.Range xlRange = workSheet.UsedRange;
@@ -168,8 +162,6 @@ namespace Test
             workSheet.Cells[5, 4] = "Ответ Пользователя";
             workSheet.Cells[5, 5] = "Балл";
             workSheet.Cells[5, 6] = "Длительность ответа";
-
-
 
             for (int i = 1; i <= qq; i++)
             {
@@ -197,10 +189,9 @@ namespace Test
             string fileName = ($"{Environment.CurrentDirectory}\\Report\\{userName}-{currentTime}.xlsx");
             workBook.SaveAs(fileName);
 
-
             CloseExcel(xlRange, workBook, workSheet, excel);
 
-            
+ 
         }
 
        
@@ -250,29 +241,22 @@ namespace Test
             t2 = DateTime.Now;
             if (answer == rightAnswer)
             {
-                //Console.WriteLine("Ответ {0} - верный.", answer);
                 point = "1";
             }
             else
             {
-                //Console.WriteLine("Ответ {0} - не верный.\nПрвельный ответ: {1}.",answer, rightAnswer);
                 point = "0";
             }
 
             TimeSpan ts = t2 - t1;
 
             string time = Convert.ToString(ts.Hours.ToString() + " минут " + ts.Seconds.ToString() + " секунд");
-            //Console.WriteLine("Время ответа: " + ts.Hours.ToString() + " минут " + ts.Seconds.ToString()+" секунд");
-            //Console.Read();
 
             report[countQuestions - 1, 0] = questions[0]; //внесение вопроса
             report[countQuestions - 1, 1] = rightAnswer; //внесение верного ответа
             report[countQuestions - 1, 2] = answer; //внесение ответа Юзера
             report[countQuestions - 1, 3] = point; //внесение ответа Юзера
             report[countQuestions - 1, 4] = time; //внесение затраченного времени на ответ
-            //Console.WriteLine();
-            //Console.WriteLine("Нажмите <Enter> клавишу для перехода к следующему вопросу");
-            //Console.Read();
             
         }
         public static void Shuffle(string[] arr, int count)
