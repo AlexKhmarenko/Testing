@@ -21,6 +21,8 @@ namespace Test
             Excel.Application xlApp = new();
             Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(adress);
 
+            
+
             //int colCount = xlRange.Columns.Count; //Колонки
             int count = 0;
             int countQuestions = 1;
@@ -63,7 +65,7 @@ namespace Test
                 }
             }
             Console.Clear();
-            Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[level];
+            Excel.Worksheet xlWorksheet = xlWorkbook.Sheets[level];
             Excel.Range xlRange = xlWorksheet.UsedRange;
             int rowCount = xlRange.Rows.Count; //Строки
 
@@ -100,28 +102,36 @@ namespace Test
                     Console.Clear();
                 }
             }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
-            Marshal.ReleaseComObject(xlRange);
-            Marshal.ReleaseComObject(xlWorksheet);  
-            xlWorkbook.Close();
-            Marshal.ReleaseComObject(xlWorkbook);
-            xlApp.Quit();
-            Marshal.ReleaseComObject(xlApp);             
-            Marshal.ReleaseComObject(xlRange);
-            
-            
+           // Marshal.ReleaseComObject(xlRange);
+         //   Marshal.ReleaseComObject(xlRange);
 
-            
-
+            CloseExcel(xlRange, xlWorkbook, xlWorksheet, xlApp);
 
             ReportToExcel(userName, level, report, questionsQuontyty);
             Console.CursorVisible = false;
             Console.WriteLine("Данные сохранены.\nНажмите <Enter> для завершения программы");
             Console.Read();
         }
+        static void CloseExcel(Excel.Range xlRange, Excel.Workbook WorkBook, Excel.Worksheet WorkSheet, Excel.Application Excel)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
+            Marshal.ReleaseComObject(xlRange);
+
+            Marshal.ReleaseComObject(WorkSheet);
+            WorkBook.Close();
+            Marshal.ReleaseComObject(WorkBook);
+            Excel.Quit();
+            Marshal.ReleaseComObject(Excel);
+
+
+
+
+
+
+        }
 
 
 
@@ -143,6 +153,8 @@ namespace Test
 
             workSheet = (Excel.Worksheet)workBook.ActiveSheet;
             workSheet.Name = userName;
+
+            Excel.Range xlRange = workSheet.UsedRange;
 
             workSheet.Range[workSheet.Cells[1, 1], workSheet.Cells[1, 8]].Merge();
             workSheet.Range[workSheet.Cells[2, 1], workSheet.Cells[2, 8]].Merge();
@@ -182,22 +194,13 @@ namespace Test
             workSheet.Columns[6].AutoFit();
 
             string currentTime = DateTime.Now.ToString().Replace(':', '_');
-
-
-
             string fileName = ($"{Environment.CurrentDirectory}\\Report\\{userName}-{currentTime}.xlsx");
-
-
-            Console.WriteLine(fileName);
             workBook.SaveAs(fileName);
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
-            workBook.Close();
-            Marshal.ReleaseComObject(workBook);
-            excel.Quit();
-            Marshal.ReleaseComObject(excel);
+            CloseExcel(xlRange, workBook, workSheet, excel);
+
+            
         }
 
        
